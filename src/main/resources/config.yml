@@ -1,0 +1,46 @@
+# Item used as physical currency for deposit/withdraw. Must be a valid Bukkit Material name.
+currency-item: ECHO_SHARD
+
+# Cooldown (milliseconds) between bets, per player, across all games.
+# Purely an anti-macro/anti-autoclicker measure.
+bet-cooldown-ms: 750
+
+# House bankroll starting balance in chips. Only used the very first time the plugin
+# ever runs (after that the persisted value in casino.db takes over).
+house-starting-bankroll: 0
+
+# House edge, expressed as a fraction subtracted from mathematically fair payout multipliers.
+# 0.02 means payouts are calculated at 98% of fair odds. Only applies to player-vs-house
+# games; Coinflip is PvP and ignores this entirely (zero house edge by design).
+house-edge: 0.02
+
+# Per-game bet limits. "enabled" is read by each game's own registration code once
+# that game is implemented; the framework itself doesn't act on it yet.
+games:
+  roulette:
+    min-bet: 1
+    max-bet: 64
+    enabled: true
+  slots:
+    min-bet: 1
+    max-bet: 32
+    enabled: true
+  blackjack:
+    min-bet: 1
+    max-bet: 64
+    enabled: true
+  coinflip:
+    min-bet: 1
+    max-bet: 128
+    enabled: true
+  mines:
+    min-bet: 1
+    max-bet: 32
+    enabled: true
+  hilo:
+    min-bet: 1
+    max-bet: 32
+    enabled: true
+
+database:
+  file: casino.db
