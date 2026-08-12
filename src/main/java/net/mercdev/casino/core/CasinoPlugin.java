@@ -13,6 +13,8 @@ import net.mercdev.casino.core.game.CasinoGame;
 import net.mercdev.casino.core.game.GameRegistry;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.game.SessionManager;
+import net.mercdev.casino.core.games.slots.SlotsGame;
+import net.mercdev.casino.core.games.coinflip.CoinflipGame;
 import net.mercdev.casino.core.listener.CasinoGuiListener;
 import net.mercdev.casino.core.listener.PlayerJoinQuitListener;
 
@@ -57,6 +59,8 @@ public class CasinoPlugin extends JavaPlugin {
         //   gameRegistry.register(new CoinflipGame());
         // The hub GUI will show no icons until at least one game is registered — expected
         // for this framework-only build.
+        gameRegistry.register(new SlotsGame(this));
+        gameRegistry.register(new CoinflipGame());
 
         getServer().getPluginManager().registerEvents(new CasinoGuiListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);

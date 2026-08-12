@@ -1,9 +1,8 @@
 package net.mercdev.casino.core.game;
 
+import net.mercdev.casino.core.CasinoPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import net.mercdev.casino.core.CasinoPlugin;
 
 /**
  * Represents one type of casino game (e.g. Slots, Roulette, Coinflip).
@@ -25,4 +24,14 @@ public interface CasinoGame {
 
     /** Creates a fresh session for a player starting this game. Does not open the GUI. */
     GameSession createSession(CasinoPlugin plugin, Player player);
+
+    /**
+     * Called when a player disconnects, for games that keep state outside any single
+     * GameSession (e.g. Coinflip's open challenges, which outlive the GUI that created
+     * them). Default no-op — most games only have per-session state, already cleaned up
+     * by SessionManager. Implementations here MUST NOT touch the disconnecting player's
+     * economy balance except to refund/credit them (their cache entry is about to be
+     * flushed and evicted right after this runs).
+     */
+    default void onPlayerQuit(CasinoPlugin plugin, Player player) {}
 }
