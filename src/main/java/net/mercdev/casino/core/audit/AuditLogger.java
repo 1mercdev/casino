@@ -70,6 +70,15 @@ public class AuditLogger {
                             result TEXT NOT NULL,
                             timestamp INTEGER NOT NULL
                         )""");
+                st.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS purchases (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            uuid TEXT NOT NULL,
+                            item_id TEXT NOT NULL,
+                            price INTEGER NOT NULL,
+                            amount INTEGER NOT NULL,
+                            timestamp INTEGER NOT NULL
+                        )""");
             }
         } catch (ClassNotFoundException | SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to initialize casino database", e);
@@ -167,6 +176,20 @@ public class AuditLogger {
             ps.executeUpdate();
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Failed to log bet for " + uuid, e);
+        }
+    }
+
+    public synchronized void logPurchase(UUID uuid, String itemId, long price, int amount) {
+        String sql = "INSERT INTO purchases (uuid, item_id, price, amount, timestamp) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, itemId);
+            ps.setLong(3, price);
+            ps.setInt(4, amount);
+            ps.setLong(5, System.currentTimeMillis());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to log purchase for " + uuid, e);
         }
     }
 }

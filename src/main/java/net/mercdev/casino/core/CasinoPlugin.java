@@ -15,6 +15,7 @@ import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.game.SessionManager;
 import net.mercdev.casino.core.games.slots.SlotsGame;
 import net.mercdev.casino.core.games.coinflip.CoinflipGame;
+import net.mercdev.casino.core.games.shop.ShopGame;
 import net.mercdev.casino.core.listener.CasinoGuiListener;
 import net.mercdev.casino.core.listener.PlayerJoinQuitListener;
 
@@ -61,6 +62,7 @@ public class CasinoPlugin extends JavaPlugin {
         // for this framework-only build.
         gameRegistry.register(new SlotsGame(this));
         gameRegistry.register(new CoinflipGame());
+        gameRegistry.register(new ShopGame(this));
 
         getServer().getPluginManager().registerEvents(new CasinoGuiListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);

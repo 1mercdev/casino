@@ -160,11 +160,11 @@ public class SlotsSession extends GameSession {
         renderBalance();
 
         if (triple) {
-            player.sendMessage("§a§lJACKPOT! §fThree " + result[0].displayName() + "s — you won " + payout + " chips.");
+            player.sendMessage("§a§lJACKPOT! §f" + "You won " + payout + " chips.");
         } else if (anyPair) {
-            player.sendMessage("§aSmall win: §f" + payout + " chips.");
+            player.sendMessage("§aYou got a pair: §f" + payout + " chips.");
         } else {
-            player.sendMessage("§7No luck this spin.");
+            player.sendMessage("§7Try again.");
         }
     }
 }

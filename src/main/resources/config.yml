@@ -44,3 +44,46 @@ games:
 
 database:
   file: casino.db
+
+# Chip shop catalog. Add/remove/reprice items freely — no rebuild needed, just reload
+# the config (a full restart is safest since ShopGame reads this once at startup).
+# Fields: id (unique, used in audit logs), material (Bukkit Material name), name
+# (optional, defaults to a prettified material name), price (chips), amount (items
+# given per purchase, default 1), permission (optional node required to buy), lore
+# (optional list of extra description lines).
+shop:
+  items:
+    - id: firework
+      material: FIREWORK_ROCKET
+      name: "Firework Rocket"
+      price: 3
+      amount: 1
+    - id: ender_pearl
+      material: ENDER_PEARL
+      name: "Ender Pearl"
+      price: 8
+      amount: 1
+    - id: diamond
+      material: DIAMOND
+      name: "Diamond"
+      price: 20
+      amount: 1
+    - id: netherite_scrap
+      material: NETHERITE_SCRAP
+      name: "Netherite Scrap"
+      price: 60
+      amount: 1
+    - id: totem
+      material: TOTEM_OF_UNDYING
+      name: "Totem of Undying"
+      price: 300
+      amount: 1
+    - id: elytra
+      material: ELYTRA
+      name: "Elytra"
+      price: 1000
+      amount: 1
+      permission: casino.shop.elytra
+      lore:
+        - "A rare treat - ask an admin if you"
+        - "don't have permission to buy this."
