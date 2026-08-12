@@ -46,7 +46,7 @@ public class CoinflipGame implements CasinoGame {
     /** Creates and escrows a new open challenge. Returns a player-facing error, or empty on success. */
     public Optional<String> createChallenge(CasinoPlugin plugin, Player player, long amount) {
         if (hasOpenChallenge(player.getUniqueId())) {
-            return Optional.of("You already have an open flip — cancel it first.");
+            return Optional.of("You already have an open duel — cancel it first.");
         }
         String denyReason = plugin.getBetLimitManager().checkBet(player, getId(), amount);
         if (denyReason != null) {
@@ -133,7 +133,7 @@ public class CoinflipGame implements CasinoGame {
 
     @Override
     public String getDisplayName() {
-        return "Coinflip";
+        return "Duels";
     }
 
     @Override
@@ -141,7 +141,7 @@ public class CoinflipGame implements CasinoGame {
         ItemStack icon = new ItemStack(Material.GOLD_NUGGET);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§eCoinflip");
+            meta.setDisplayName("§eDuels");
             icon.setItemMeta(meta);
         }
         return icon;

@@ -75,11 +75,11 @@ public class CoinflipSession extends GameSession {
         inventory.setItem(SLOT_BET_PLUS_5, GuiItems.named(Material.LIME_STAINED_GLASS_PANE, "§a+5 bet"));
 
         if (coinflipGame.hasOpenChallenge(player.getUniqueId())) {
-            inventory.setItem(SLOT_ACTION, GuiItems.named(Material.BARRIER, "§cCancel your flip",
-                    "§7You have an open flip waiting for", "§7an opponent. Click to refund it."));
+            inventory.setItem(SLOT_ACTION, GuiItems.named(Material.BARRIER, "§cCancel your duel",
+                    "§7You have an open duel waiting for", "§7an opponent. Click to refund it."));
         } else {
-            inventory.setItem(SLOT_ACTION, GuiItems.named(Material.GOLD_NUGGET, "§a§lCreate flip",
-                    "§7Challenge anyone for " + currentBet + " chips", "§7No house edge — winner takes both stakes."));
+            inventory.setItem(SLOT_ACTION, GuiItems.named(Material.GOLD_NUGGET, "§a§lCreate duel",
+                    "§7Challenge anyone for " + currentBet + " chips!", "§7You win, you keep everything."));
         }
         renderBalance();
     }
@@ -145,13 +145,13 @@ public class CoinflipSession extends GameSession {
     private void handleAction() {
         if (coinflipGame.hasOpenChallenge(player.getUniqueId())) {
             coinflipGame.cancelChallenge(plugin, player);
-            player.sendMessage("§7Your flip was cancelled and refunded.");
+            player.sendMessage("§7Your duel was cancelled and refunded.");
         } else {
             Optional<String> error = coinflipGame.createChallenge(plugin, player, currentBet);
             if (error.isPresent()) {
                 player.sendMessage("§c" + error.get());
             } else {
-                player.sendMessage("§aFlip created for " + currentBet + " chips — waiting for someone to accept.");
+                player.sendMessage("§aDuel created for " + currentBet + " chips — waiting for someone to accept.");
             }
         }
         renderCreateControls();
