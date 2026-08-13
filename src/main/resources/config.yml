@@ -1,21 +1,19 @@
-# Item used as physical currency for deposit/withdraw. Must be a valid Bukkit Material name.
+# Item to use as currency: must be a minecraft item, ALL CAPS.
 currency-item: ECHO_SHARD
 
-# Cooldown (milliseconds) between bets, per player, across all games.
-# Purely an anti-macro/anti-autoclicker measure.
+# min cooldown for each bet. applies to all games.
 bet-cooldown-ms: 750
 
-# House bankroll starting balance in chips. Only used the very first time the plugin
-# ever runs (after that the persisted value in casino.db takes over).
+# on FIRST init, this is the starting bankroll balance. you can edit it before launching casino the first time.
+# If you prefer so, you can delete the database (.db) file and wipe everything to start from scratch again.
 house-starting-bankroll: 0
 
-# House edge, expressed as a fraction subtracted from mathematically fair payout multipliers.
-# 0.02 means payouts are calculated at 98% of fair odds. Only applies to player-vs-house
-# games; Coinflip is PvP and ignores this entirely (zero house edge by design).
+# If a game is against the house (example: slots) you can specify the edge the house gets here. 
+# 0 means completely fair odds. 0.02 means 98% fair odds, aka 2% edge for the house.
+# Duels ignore this.
 house-edge: 0.02
 
-# Per-game bet limits. "enabled" is read by each game's own registration code once
-# that game is implemented; the framework itself doesn't act on it yet.
+# config for max-min bets and enabling/disabling. Ignore if you're here for the shop.
 games:
   roulette:
     min-bet: 1
@@ -42,15 +40,27 @@ games:
     max-bet: 32
     enabled: true
 
+# Database file name! (sqlite)
 database:
   file: casino.db
 
-# Chip shop catalog. Add/remove/reprice items freely — no rebuild needed, just reload
-# the config (a full restart is safest since ShopGame reads this once at startup).
-# Fields: id (unique, used in audit logs), material (Bukkit Material name), name
-# (optional, defaults to a prettified material name), price (chips), amount (items
-# given per purchase, default 1), permission (optional node required to buy), lore
-# (optional list of extra description lines).
+# Shop config: 
+# id: identifier inside the plugin (ex. water_bucket)
+# material: ACTUAL minecraft item, all caps: (WATER_BUCKET)
+# name: self explanatory
+# price: same
+# amount: same
+# lore: extra information 
+# permission: if you want me to add a special permission for it
+# example config: 
+# id: water_bucket
+# name: "Water Bucket"
+# price: 1
+# amount: 2
+# permission: casino.shop.waterbucket
+# lore:
+#     - "Extra information about the item"
+#     - "Possibly multiple lines if you do it like this"
 shop:
   items:
     - id: firework
@@ -78,12 +88,3 @@ shop:
       name: "Totem of Undying"
       price: 300
       amount: 1
-    - id: elytra
-      material: ELYTRA
-      name: "Elytra"
-      price: 1000
-      amount: 1
-      permission: casino.shop.elytra
-      lore:
-        - "A rare treat - ask an admin if you"
-        - "don't have permission to buy this."
