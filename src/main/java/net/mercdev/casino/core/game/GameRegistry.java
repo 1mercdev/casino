@@ -11,8 +11,9 @@ public class GameRegistry {
 
     private final Map<String, CasinoGame> games = new LinkedHashMap<>();
 
-    public void register(CasinoGame game) {
-        games.put(game.getId().toLowerCase(), game);
+    public void tryRegister(CasinoGame game, boolean enabled) {
+        if (enabled)
+            games.put(game.getId().toLowerCase(), game);
     }
 
     public Optional<CasinoGame> get(String id) {

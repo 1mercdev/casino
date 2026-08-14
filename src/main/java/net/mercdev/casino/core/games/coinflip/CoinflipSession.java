@@ -54,7 +54,7 @@ public class CoinflipSession extends GameSession {
 
     @Override
     public void open() {
-        this.inventory = Bukkit.createInventory(this, 27, "Coinflip");
+        this.inventory = Bukkit.createInventory(this, 27, "Duels");
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
         }

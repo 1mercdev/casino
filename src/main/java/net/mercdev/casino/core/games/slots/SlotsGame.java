@@ -127,7 +127,7 @@ public class SlotsGame implements CasinoGame {
 
     @Override
     public String getDisplayName() {
-        return "Slots";
+        return getMenuIcon().getItemMeta().getDisplayName();
     }
 
     @Override

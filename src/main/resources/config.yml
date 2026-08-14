@@ -39,6 +39,8 @@ games:
     min-bet: 1
     max-bet: 32
     enabled: true
+  shop:
+    enabled: true
 
 # Database file name! (sqlite)
 database:
@@ -63,28 +65,58 @@ database:
 #     - "Possibly multiple lines if you do it like this"
 shop:
   items:
-    - id: firework
-      material: FIREWORK_ROCKET
-      name: "Firework Rocket"
-      price: 3
-      amount: 1
-    - id: ender_pearl
-      material: ENDER_PEARL
-      name: "Ender Pearl"
-      price: 8
-      amount: 1
     - id: diamond
       material: DIAMOND
       name: "Diamond"
-      price: 20
-      amount: 1
+      price: 1
+      amount: 6
     - id: netherite_scrap
       material: NETHERITE_SCRAP
       name: "Netherite Scrap"
-      price: 60
+      price: 1
       amount: 1
     - id: totem
       material: TOTEM_OF_UNDYING
       name: "Totem of Undying"
-      price: 300
+      price: 5
       amount: 1
+    - id: gold_block
+      material: GOLD_BLOCK
+      name: "Block of Gold"
+      price: 1
+      amount: 3
+    - id: enchanted_golden_apple
+      material: ENCHANTED_GOLDEN_APPLE
+      name: "Enchanted Golden Apple"
+      price: 4
+      amount: 1
+    - id: obsidian
+      material: OBSIDIAN
+      name: "Obsidian"
+      price: 1
+      amount: 12
+    - id: trident
+      material: TRIDENT
+      name: "Trident"
+      price: 8
+      amount: 1
+    - id: heavy_core
+      material: HEAVY_CORE
+      name: "Heavy Core"
+      price: 12
+      amount: 1
+    - id: diamond_horse_armor
+      material: DIAMOND_HORSE_ARMOR
+      name: "Diamond Horse Armor"
+      price: 2
+      amount: 1
+    - id: diamond_nautilus_armor
+      material: DIAMOND_NAUTILUS_ARMOR
+      name: "Diamond Nautilus Armor"
+      price: 2
+      amount: 1
+    - id: sand
+      material: SAND
+      name: "Sand"
+      price: 8
+      amount: 2304

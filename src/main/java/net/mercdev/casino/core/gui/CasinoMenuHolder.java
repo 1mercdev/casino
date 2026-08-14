@@ -33,6 +33,7 @@ public class CasinoMenuHolder implements InventoryHolder {
     private final Inventory inventory;
     private final Map<Integer, String> slotToGameId = new LinkedHashMap<>();
 
+
     public CasinoMenuHolder(GameRegistry registry) {
         this.inventory = Bukkit.createInventory(this, 27, "Casino");
         build(registry);
@@ -45,8 +46,17 @@ public class CasinoMenuHolder implements InventoryHolder {
             ItemStack icon = game.getMenuIcon().clone();
             ItemMeta meta = icon.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(game.getDisplayName());
                 icon.setItemMeta(meta);
+            }
+            else {
+                icon = new ItemStack(Material.BARRIER);
+                meta = icon.getItemMeta();
+                if (meta != null){
+                    meta.setDisplayName("§4Unavailable");
+                    meta.setLore(List.of("This game is not available.", "Something went wrong while initializing it."));
+                    icon.setItemMeta(meta);
+                }
+                continue;
             }
             inventory.setItem(slot, icon);
             slotToGameId.put(slot, game.getId());

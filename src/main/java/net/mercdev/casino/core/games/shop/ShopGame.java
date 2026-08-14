@@ -93,7 +93,7 @@ public class ShopGame implements CasinoGame {
 
     @Override
     public String getDisplayName() {
-        return "Shop";
+        return getMenuIcon().getItemMeta().getDisplayName();
     }
 
     @Override

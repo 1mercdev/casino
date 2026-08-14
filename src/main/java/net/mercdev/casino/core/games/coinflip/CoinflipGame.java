@@ -133,7 +133,7 @@ public class CoinflipGame implements CasinoGame {
 
     @Override
     public String getDisplayName() {
-        return "Duels";
+        return getMenuIcon().getItemMeta().getDisplayName();
     }
 
     @Override

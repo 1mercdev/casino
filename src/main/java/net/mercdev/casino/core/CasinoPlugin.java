@@ -1,6 +1,7 @@
 package net.mercdev.casino.core;
 
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,6 +31,10 @@ public class CasinoPlugin extends JavaPlugin {
     private Material currencyItem;
     private double houseEdge;
 
+    private boolean isPluginEnabled(String id, ConfigurationSection gameSection){
+        return gameSection.getConfigurationSection(id).getBoolean("enabled", true);
+    }
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -50,19 +55,17 @@ public class CasinoPlugin extends JavaPlugin {
         houseBankroll = new HouseBankroll(this, auditLogger, storedBankroll >= 0 ? storedBankroll : configuredStart);
 
         economyManager = new EconomyManager(this, auditLogger, currencyItem);
-        betLimitManager = new BetLimitManager(getConfig().getConfigurationSection("games"),
+        
+        ConfigurationSection gameSection = getConfig().getConfigurationSection("games");
+        betLimitManager = new BetLimitManager(gameSection,
                 getConfig().getLong("bet-cooldown-ms", 750));
 
         gameRegistry = new GameRegistry();
         sessionManager = new SessionManager();
-        // Individual games register themselves here once implemented, e.g.:
-        //   gameRegistry.register(new SlotsGame());
-        //   gameRegistry.register(new CoinflipGame());
-        // The hub GUI will show no icons until at least one game is registered — expected
-        // for this framework-only build.
-        gameRegistry.register(new SlotsGame(this));
-        gameRegistry.register(new CoinflipGame());
-        gameRegistry.register(new ShopGame(this));
+
+        gameRegistry.tryRegister(new SlotsGame(this), isPluginEnabled("slots", gameSection));
+        gameRegistry.tryRegister(new CoinflipGame(), isPluginEnabled("coinflip", gameSection));
+        gameRegistry.tryRegister(new ShopGame(this), isPluginEnabled("shop", gameSection));
 
         getServer().getPluginManager().registerEvents(new CasinoGuiListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinQuitListener(this), this);
