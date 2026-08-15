@@ -67,11 +67,6 @@ public class MinesGame implements CasinoGame {
     }
 
     @Override
-    public String getDisplayName() {
-        return getMenuIcon().getItemMeta().getDisplayName();
-    }
-
-    @Override
     public ItemStack getMenuIcon() {
         ItemStack icon = new ItemStack(Material.TNT);
         ItemMeta meta = icon.getItemMeta();

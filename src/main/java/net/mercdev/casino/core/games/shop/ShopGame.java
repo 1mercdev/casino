@@ -92,11 +92,6 @@ public class ShopGame implements CasinoGame {
     }
 
     @Override
-    public String getDisplayName() {
-        return getMenuIcon().getItemMeta().getDisplayName();
-    }
-
-    @Override
     public ItemStack getMenuIcon() {
         ItemStack icon = new ItemStack(Material.EMERALD);
         ItemMeta meta = icon.getItemMeta();

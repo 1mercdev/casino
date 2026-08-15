@@ -92,11 +92,6 @@ public class RouletteGame implements CasinoGame {
     }
 
     @Override
-    public String getDisplayName() {
-        return getMenuIcon().getItemMeta().getDisplayName();
-    }
-
-    @Override
     public ItemStack getMenuIcon() {
         ItemStack icon = new ItemStack(Material.CLOCK);
         ItemMeta meta = icon.getItemMeta();

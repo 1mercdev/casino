@@ -92,11 +92,6 @@ public class HiLoGame implements CasinoGame {
     }
 
     @Override
-    public String getDisplayName() {
-        return getMenuIcon().getItemMeta().getDisplayName();
-    }
-
-    @Override
     public ItemStack getMenuIcon() {
         ItemStack icon = new ItemStack(Material.COMPARATOR);
         ItemMeta meta = icon.getItemMeta();

@@ -132,11 +132,6 @@ public class CoinflipGame implements CasinoGame {
     }
 
     @Override
-    public String getDisplayName() {
-        return getMenuIcon().getItemMeta().getDisplayName();
-    }
-
-    @Override
     public ItemStack getMenuIcon() {
         ItemStack icon = new ItemStack(Material.GOLD_NUGGET);
         ItemMeta meta = icon.getItemMeta();

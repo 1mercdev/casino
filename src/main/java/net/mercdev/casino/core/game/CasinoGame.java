@@ -16,9 +16,6 @@ public interface CasinoGame {
     /** Stable lowercase identifier, e.g. "slots". Used in config.yml, commands, and audit logs. */
     String getId();
 
-    /** Player-facing name, e.g. "Slots". Derived from menuIcon's metadata.*/
-    String getDisplayName();
-
     /** Icon shown for this game in the casino hub GUI. */
     ItemStack getMenuIcon();
 
