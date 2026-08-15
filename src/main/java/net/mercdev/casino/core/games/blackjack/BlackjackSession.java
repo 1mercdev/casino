@@ -111,7 +111,7 @@ public class BlackjackSession extends GameSession {
         lore.add("§7Regular win pays 1:1. Push returns");
         lore.add("§7your bet. Dealer stands on all 17s.");
         lore.add("§7Closing mid-hand voids the round and");
-        lore.add("§7refunds your bet - it's never resolved");
+        lore.add("§7refunds half your bet - it's never resolved");
         lore.add("§7without you seeing the outcome.");
         if (lastResultMessage != null) {
             lore.add(" ");
@@ -139,9 +139,9 @@ public class BlackjackSession extends GameSession {
     @Override
     public void onClose(InventoryCloseEvent event) {
         if (roundActive) {
-            plugin.getEconomyManager().addChips(player, currentBet);
-            plugin.getHouseBankroll().resolveBet(currentBet);
-            plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, currentBet, "REFUND_CLOSE");
+            plugin.getEconomyManager().addChips(player, currentBet / 2);
+            plugin.getHouseBankroll().resolveBet(currentBet / 2);
+            plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, currentBet / 2, "REFUND_CLOSE");
             roundActive = false;
         }
         settled = true;
