@@ -173,3 +173,6 @@ Building requires network access to `repo.papermc.io` for the Paper API dependen
 ```
 mvn clean package
 ```
+
+## License
+This software is distributed under the GPLv3.0 license. See 'LICENSE' for more information.
