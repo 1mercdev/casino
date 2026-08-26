@@ -4,6 +4,7 @@ import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.games.shop.ShopGame.ShopItem;
 import net.mercdev.casino.core.gui.GuiItems;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -46,7 +47,7 @@ public class ShopSession extends GameSession {
 
     private void render() {
         for (int i = 0; i < inventory.getSize(); i++) {
-            inventory.setItem(i, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
+            inventory.setItem(i, GuiItems.filler(Material.LIME_TERRACOTTA));
         }
         slotToItem.clear();
 
@@ -96,11 +97,13 @@ public class ShopSession extends GameSession {
 
         if (slot == SLOT_PREV_PAGE && page > 0) {
             page--;
+            GameFx.click(player);
             render();
             return;
         }
         if (slot == SLOT_NEXT_PAGE && (page + 1) * ITEMS_PER_PAGE < catalog.size()) {
             page++;
+            GameFx.click(player);
             render();
             return;
         }
@@ -129,6 +132,7 @@ public class ShopSession extends GameSession {
 
         plugin.getAuditLogger().logPurchase(player.getUniqueId(), item.id(), item.price(), item.amount());
 
+        GameFx.chip(player);
         player.sendMessage("§aBought " + item.displayName() + " for " + item.price() + " chips.");
         renderBalance();
     }

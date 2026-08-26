@@ -3,6 +3,7 @@ package net.mercdev.casino.core.games.slots;
 import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.gui.GuiItems;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -50,7 +51,7 @@ public class SlotsSession extends GameSession {
 
     private void renderAll() {
         for (int i = 0; i < inventory.getSize(); i++) {
-            inventory.setItem(i, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
+            inventory.setItem(i, GuiItems.filler(Material.YELLOW_TERRACOTTA));
         }
         inventory.setItem(SLOT_INFO, buildInfoItem());
         for (int slot : REEL_SLOTS) {
@@ -115,6 +116,7 @@ public class SlotsSession extends GameSession {
         long min = plugin.getBetLimitManager().getMinBet(game.getId());
         long max = plugin.getBetLimitManager().getMaxBet(game.getId());
         currentBet = Math.max(min, Math.min(max, currentBet + delta));
+        GameFx.click(player);
         renderBetControls();
     }
 
@@ -136,6 +138,7 @@ public class SlotsSession extends GameSession {
 
         plugin.getEconomyManager().removeChips(player, currentBet);
         plugin.getHouseBankroll().reserveBet(currentBet);
+        GameFx.lever(player);
 
         SlotsGame.SlotSymbol[] result = slotsGame.rollReels();
         long payout = slotsGame.computePayout(result, currentBet);
@@ -154,16 +157,21 @@ public class SlotsSession extends GameSession {
         for (int i = 0; i < REEL_SLOTS.length; i++) {
             SlotsGame.SlotSymbol symbol = result[i];
             String colour = payout > 0 ? "§a" : "§f";
-            inventory.setItem(REEL_SLOTS[i], GuiItems.named(symbol.material(), colour + symbol.displayName()));
+            var icon = GuiItems.named(symbol.material(), colour + symbol.displayName());
+            if (triple) icon = GuiItems.glow(icon);
+            inventory.setItem(REEL_SLOTS[i], icon);
         }
         renderBetControls();
         renderBalance();
 
         if (triple) {
+            GameFx.jackpot(player);
             player.sendMessage("§a§lJACKPOT! §f" + "You won " + payout + " chips.");
         } else if (anyPair) {
+            GameFx.win(player);
             player.sendMessage("§aYou got a pair: §f" + payout + " chips.");
         } else {
+            GameFx.lose(player);
             player.sendMessage("§7Try again.");
         }
     }

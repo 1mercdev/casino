@@ -3,6 +3,7 @@ package net.mercdev.casino.core.games.blackjack;
 import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.gui.GuiItems;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -58,7 +59,7 @@ public class BlackjackSession extends GameSession {
 
     private void render() {
         for (int i = 0; i < inventory.getSize(); i++) {
-            inventory.setItem(i, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
+            inventory.setItem(i, GuiItems.filler(Material.GREEN_TERRACOTTA));
         }
         inventory.setItem(SLOT_INFO, buildInfoItem());
         renderBalance();
@@ -95,7 +96,11 @@ public class BlackjackSession extends GameSession {
                     : GuiItems.named(Material.PAPER, "§f" + dealerHand.get(i).label()));
         }
         for (int i = 0; i < playerHand.size() && i < 9; i++) {
-            inventory.setItem(PLAYER_ROW_START + i, GuiItems.named(Material.PAPER, "§f" + playerHand.get(i).label()));
+            var icon = GuiItems.named(Material.PAPER, "§f" + playerHand.get(i).label());
+            if (BlackjackGame.isBlackjack(playerHand)) {
+                icon = GuiItems.glow(icon);
+            }
+            inventory.setItem(PLAYER_ROW_START + i, icon);
         }
     }
 
@@ -111,8 +116,7 @@ public class BlackjackSession extends GameSession {
         lore.add("§7Regular win pays 1:1. Push returns");
         lore.add("§7your bet. Dealer stands on all 17s.");
         lore.add("§7Closing mid-hand voids the round and");
-        lore.add("§7refunds half your bet - it's never resolved");
-        lore.add("§7without you seeing the outcome.");
+        lore.add("§7refunds half your bet.");
         if (lastResultMessage != null) {
             lore.add(" ");
             lore.add("§7Last round: " + lastResultMessage);
@@ -139,9 +143,9 @@ public class BlackjackSession extends GameSession {
     @Override
     public void onClose(InventoryCloseEvent event) {
         if (roundActive) {
-            plugin.getEconomyManager().addChips(player, currentBet / 2);
-            plugin.getHouseBankroll().resolveBet(currentBet / 2);
-            plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, currentBet / 2, "REFUND_CLOSE");
+            plugin.getEconomyManager().addChips(player, currentBet);
+            plugin.getHouseBankroll().resolveBet(currentBet);
+            plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, currentBet, "REFUND_CLOSE");
             roundActive = false;
         }
         settled = true;
@@ -151,6 +155,7 @@ public class BlackjackSession extends GameSession {
         long min = plugin.getBetLimitManager().getMinBet(game.getId());
         long max = plugin.getBetLimitManager().getMaxBet(game.getId());
         currentBet = Math.max(min, Math.min(max, currentBet + delta));
+        GameFx.click(player);
         render();
     }
 
@@ -168,7 +173,7 @@ public class BlackjackSession extends GameSession {
         // separate check when it's actually chosen, since it can only happen after this
         // blackjack check has already passed (you can't double an already-resolved hand).
         if (!plugin.getHouseBankroll().canAcceptBet(currentBet, Math.round(currentBet * 2.5))) {
-            player.sendMessage("§cThe house can't cover this bet right now — try lowering it.");
+            player.sendMessage("§cThe house can't cover this bet right now; try lowering it.");
             return;
         }
 
@@ -182,16 +187,20 @@ public class BlackjackSession extends GameSession {
         canDouble = true;
         playerHand = new ArrayList<>(List.of(BlackjackGame.draw(), BlackjackGame.draw()));
         dealerHand = new ArrayList<>(List.of(BlackjackGame.draw(), BlackjackGame.draw()));
+        GameFx.lever(player);
 
         boolean playerBJ = BlackjackGame.isBlackjack(playerHand);
         boolean dealerBJ = BlackjackGame.isBlackjack(dealerHand);
         if (playerBJ || dealerBJ) {
             dealerHoleCardRevealed = true;
             if (playerBJ && dealerBJ) {
-                settleRound(currentBet, "PUSH", "§eBoth blackjack — push.");
+                GameFx.win(player);
+                settleRound(currentBet, "PUSH", "§eTwo blackjacks, push.");
             } else if (playerBJ) {
+                GameFx.jackpot(player);
                 settleRound(Math.round(currentBet * 2.5), "WIN", "§a§lBlackjack! §fYou win 3:2.");
             } else {
+                GameFx.lose(player);
                 settleRound(0, "LOSE", "§cDealer has blackjack.");
             }
             return;
@@ -203,6 +212,7 @@ public class BlackjackSession extends GameSession {
     private void hit() {
         canDouble = false;
         playerHand.add(BlackjackGame.draw());
+        GameFx.reveal(player);
         if (BlackjackGame.isBust(playerHand)) {
             resolveBust();
         } else {
@@ -241,6 +251,7 @@ public class BlackjackSession extends GameSession {
 
     private void resolveBust() {
         dealerHoleCardRevealed = true;
+        GameFx.bust(player);
         settleRound(0, "LOSE", "§cBust! You went over 21.");
     }
 
@@ -252,10 +263,12 @@ public class BlackjackSession extends GameSession {
         int dealerTotal = BlackjackGame.handValue(dealerHand);
 
         if (BlackjackGame.isBust(dealerHand) || playerTotal > dealerTotal) {
+            GameFx.win(player);
             settleRound(currentBet * 2, "WIN", "§aYou win! " + playerTotal + " vs " + dealerTotal + ".");
         } else if (playerTotal == dealerTotal) {
             settleRound(currentBet, "PUSH", "§ePush. Both " + playerTotal + ".");
         } else {
+            GameFx.lose(player);
             settleRound(0, "LOSE", "§cDealer wins. " + dealerTotal + " vs " + playerTotal + ".");
         }
     }

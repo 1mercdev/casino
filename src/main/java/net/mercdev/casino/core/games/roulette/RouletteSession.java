@@ -3,6 +3,7 @@ package net.mercdev.casino.core.games.roulette;
 import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.gui.GuiItems;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -112,7 +113,7 @@ public class RouletteSession extends GameSession {
                 "§7Min " + min + " / Max " + max));
         inventory.setItem(SLOT_BET_PLUS_1, GuiItems.named(Material.LIME_STAINED_GLASS_PANE, "§a+1 bet"));
         inventory.setItem(SLOT_BET_PLUS_5, GuiItems.named(Material.LIME_STAINED_GLASS_PANE, "§a+5 bet"));
-        inventory.setItem(SLOT_FILLER, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
+        inventory.setItem(SLOT_FILLER, GuiItems.filler(Material.PURPLE_TERRACOTTA));
         renderBalance();
     }
 
@@ -188,6 +189,7 @@ public class RouletteSession extends GameSession {
         }
         plugin.getEconomyManager().removeChips(player, currentBet);
         plugin.getHouseBankroll().reserveBet(currentBet);
+        GameFx.lever(player);
         return true;
     }
 
@@ -217,12 +219,21 @@ public class RouletteSession extends GameSession {
 
         lastResult = result;
         renderControls();
+        int resultSlot = (result == 0) ? SLOT_ZERO : FIRST_NUMBER_SLOT + (result - 1);
+        inventory.setItem(resultSlot, GuiItems.glow(buildNumberIcon(result)));
 
         String colour = result == 0 ? "§aGreen" : rouletteGame.isRed(result) ? "§cRed" : "§8Black";
         if (win) {
+            boolean bigWin = payout >= currentBet * 10; // straight-up hit
+            if (bigWin) {
+                GameFx.jackpot(player);
+            } else {
+                GameFx.win(player);
+            }
             player.sendMessage("§a§lWIN! §fThe ball landed on " + colour + "§f " + result
                     + " — you won " + payout + " chips (" + betDescription + ").");
         } else {
+            GameFx.lose(player);
             player.sendMessage("§7The ball landed on " + colour + "§7 " + result
                     + ". No win (" + betDescription + ").");
         }

@@ -3,6 +3,7 @@ package net.mercdev.casino.core.games.mines;
 import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.gui.GuiItems;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -120,13 +121,13 @@ public class MinesSession extends GameSession {
             inventory.setItem(gridSlot(index), buildTileIcon(index));
         }
         for (int slot : MARGIN_FILLER_SLOTS) {
-            inventory.setItem(slot, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
+            inventory.setItem(slot, GuiItems.filler(Material.BLACK_TERRACOTTA));
         }
     }
 
     private ItemStack buildTileIcon(int index) {
         if (revealedSafe.contains(index)) {
-            return GuiItems.named(Material.EMERALD, "§aSafe");
+            return GuiItems.glow(GuiItems.named(Material.EMERALD, "§aSafe"));
         }
         if (revealedMinesAfterRound.contains(index)) {
             boolean wasClicked = Integer.valueOf(index).equals(lastExplodedIndex);
@@ -147,7 +148,7 @@ public class MinesSession extends GameSession {
             inventory.setItem(SLOT_POTENTIAL_PAYOUT, GuiItems.named(Material.GOLD_INGOT, "§ePotential: " + potentialPayout + " chips"));
             inventory.setItem(SLOT_MULTIPLIER, GuiItems.named(Material.NETHER_STAR, String.format("§eMultiplier: %.2fx", cumulativeMultiplier)));
             if (!revealedSafe.isEmpty()) {
-                inventory.setItem(SLOT_CASH_OUT, GuiItems.named(Material.EMERALD_BLOCK, "§a§lCASH OUT", "§7Lock in " + potentialPayout + " chips"));
+                inventory.setItem(SLOT_CASH_OUT, GuiItems.glow(GuiItems.named(Material.EMERALD_BLOCK, "§a§lCASH OUT", "§7Lock in " + potentialPayout + " chips")));
             } else {
                 inventory.setItem(SLOT_CASH_OUT, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
             }
@@ -212,11 +213,13 @@ public class MinesSession extends GameSession {
         long min = plugin.getBetLimitManager().getMinBet(game.getId());
         long max = plugin.getBetLimitManager().getMaxBet(game.getId());
         currentBet = Math.max(min, Math.min(max, currentBet + delta));
+        GameFx.click(player);
         render();
     }
 
     private void adjustMines(int delta) {
         mineCount = Math.max(MinesGame.MIN_MINES, Math.min(MinesGame.MAX_MINES, mineCount + delta));
+        GameFx.click(player);
         render();
     }
 
@@ -280,6 +283,7 @@ public class MinesSession extends GameSession {
 
         cumulativeMultiplier = nextMultiplier;
         revealedSafe.add(index);
+        GameFx.reveal(player);
 
         if (revealedSafe.size() == MinesGame.GRID_SIZE - mineCount) {
             player.sendMessage("§a§lFull clear! §7Every safe tile found.");
@@ -294,6 +298,7 @@ public class MinesSession extends GameSession {
         revealedMinesAfterRound = minePositions;
         plugin.getHouseBankroll().resolveBet(0);
         plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, 0, "LOSE");
+        GameFx.bust(player);
         player.sendMessage("§c§lBOOM! §7You hit a mine and lost this round.");
         endRound();
     }
@@ -303,6 +308,11 @@ public class MinesSession extends GameSession {
         plugin.getEconomyManager().addChips(player, payout);
         plugin.getHouseBankroll().resolveBet(payout);
         plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, payout, "WIN");
+        if (cumulativeMultiplier >= 5.0) {
+            GameFx.jackpot(player);
+        } else {
+            GameFx.win(player);
+        }
         player.sendMessage("§a§lCashed out! §f+" + payout + " chips (" + String.format("%.2fx", cumulativeMultiplier) + ")");
         endRound();
     }

@@ -3,6 +3,7 @@ package net.mercdev.casino.core.games.hilo;
 import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.gui.GuiItems;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -57,7 +58,7 @@ public class HiLoSession extends GameSession {
 
     private void render() {
         for (int i = 0; i < inventory.getSize(); i++) {
-            inventory.setItem(i, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
+            inventory.setItem(i, GuiItems.filler(Material.CYAN_TERRACOTTA));
         }
         inventory.setItem(SLOT_INFO, buildInfoItem());
         renderBalance();
@@ -91,8 +92,8 @@ public class HiLoSession extends GameSession {
             inventory.setItem(SLOT_HIGHER, buildGuessItem(HiLoGame.Guess.HIGHER));
         }
         if (cumulativeMultiplier > 1.0) {
-            inventory.setItem(SLOT_ACTION, GuiItems.named(Material.EMERALD, "§a§lCASH OUT",
-                    "§7Lock in " + potentialPayout + " chips"));
+            inventory.setItem(SLOT_ACTION, GuiItems.glow(GuiItems.named(Material.EMERALD, "§a§lCASH OUT",
+                    "§7Lock in " + potentialPayout + " chips")));
         }
     }
 
@@ -186,6 +187,7 @@ public class HiLoSession extends GameSession {
         settled = false;
         cumulativeMultiplier = 1.0;
         currentRank = hiLoGame.drawCard();
+        GameFx.lever(player);
         render();
     }
 
@@ -212,12 +214,14 @@ public class HiLoSession extends GameSession {
         if (win) {
             cumulativeMultiplier = nextMultiplier;
             currentRank = newRank;
+            GameFx.reveal(player);
             player.sendMessage("§a" + HiLoGame.rankName(newRank) + "! §7Multiplier now "
                     + String.format("%.2fx", cumulativeMultiplier));
             render();
         } else {
             plugin.getHouseBankroll().resolveBet(0);
             plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, 0, "LOSE");
+            GameFx.lose(player);
             player.sendMessage("§c" + HiLoGame.rankName(newRank) + ". §7You lost this round.");
             endRound();
         }
@@ -228,6 +232,11 @@ public class HiLoSession extends GameSession {
         plugin.getEconomyManager().addChips(player, payout);
         plugin.getHouseBankroll().resolveBet(payout);
         plugin.getAuditLogger().logBet(player.getUniqueId(), game.getId(), currentBet, payout, "WIN");
+        if (cumulativeMultiplier >= 5.0) {
+            GameFx.jackpot(player);
+        } else {
+            GameFx.win(player);
+        }
         player.sendMessage("§a§lCashed out! §f+" + payout + " chips (" + String.format("%.2fx", cumulativeMultiplier) + ")");
         endRound();
     }

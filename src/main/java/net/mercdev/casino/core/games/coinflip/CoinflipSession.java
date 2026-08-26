@@ -3,6 +3,7 @@ package net.mercdev.casino.core.games.coinflip;
 import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.game.GameSession;
 import net.mercdev.casino.core.gui.GuiItems;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -56,7 +57,7 @@ public class CoinflipSession extends GameSession {
     public void open() {
         this.inventory = Bukkit.createInventory(this, 27, "Duels");
         for (int i = 0; i < inventory.getSize(); i++) {
-            inventory.setItem(i, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
+            inventory.setItem(i, GuiItems.filler(Material.ORANGE_TERRACOTTA));
         }
         renderCreateControls();
         renderChallenges();
@@ -145,12 +146,14 @@ public class CoinflipSession extends GameSession {
     private void handleAction() {
         if (coinflipGame.hasOpenChallenge(player.getUniqueId())) {
             coinflipGame.cancelChallenge(plugin, player);
+            GameFx.click(player);
             player.sendMessage("§7Your duel was cancelled and refunded.");
         } else {
             Optional<String> error = coinflipGame.createChallenge(plugin, player, currentBet);
             if (error.isPresent()) {
                 player.sendMessage("§c" + error.get());
             } else {
+                GameFx.chip(player);
                 player.sendMessage("§aDuel created for " + currentBet + " chips — waiting for someone to accept.");
             }
         }
@@ -162,7 +165,11 @@ public class CoinflipSession extends GameSession {
         UUID challengerId = slotToChallenger.get(slot);
         if (challengerId == null) return;
         Optional<String> error = coinflipGame.acceptChallenge(plugin, player, challengerId);
-        error.ifPresent(msg -> player.sendMessage("§c" + msg));
+        if (error.isPresent()) {
+            player.sendMessage("§c" + error.get());
+        }
+        // Win/loss sound plays from the messages CoinflipGame already sent both players;
+        // GameFx here just confirms the acceptance itself went through.
         renderCreateControls();
         renderChallenges();
     }
