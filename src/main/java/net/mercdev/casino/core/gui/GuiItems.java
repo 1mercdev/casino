@@ -35,4 +35,17 @@ public final class GuiItems {
         }
         return item;
     }
+
+    /** Forces an item to show the enchantment glint, without needing a fake enchantment
+     *  (and without the "hide the enchantment but keep the glint" dance that requires).
+     *  Used to mark celebratory items — a jackpot reel, a revealed safe Mines tile — as
+     *  visually distinct from an ordinary one. */
+    public static ItemStack glow(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setEnchantmentGlintOverride(true);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
 }
