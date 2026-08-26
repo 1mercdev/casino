@@ -1,10 +1,10 @@
 # Casino 
 
-A Paper pluginfor a multi-game casino (Roulette, Slots, Blackjack, Coinflip,
+A Paper plugin for a multi-game casino (Roulette, Slots, Blackjack, Coinflip,
 Mines, HiLo).
 
 
-Thank you claude for sponsoring this readme!
+Thank you claude for sponsoring this readme and documentation throughout the code! (i cannot bother doing it myself)
 
 ## Layout
 
