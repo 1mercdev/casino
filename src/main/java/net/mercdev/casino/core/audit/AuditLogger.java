@@ -79,6 +79,11 @@ public class AuditLogger {
                             amount INTEGER NOT NULL,
                             timestamp INTEGER NOT NULL
                         )""");
+                st.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS daily_claims (
+                            uuid TEXT PRIMARY KEY,
+                            last_claimed INTEGER NOT NULL
+                        )""");
             }
         } catch (ClassNotFoundException | SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to initialize casino database", e);
@@ -190,6 +195,36 @@ public class AuditLogger {
             ps.executeUpdate();
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Failed to log purchase for " + uuid, e);
+        }
+    }
+
+    /** Returns the epoch-millis timestamp of a player's last /casino daily claim, or 0 if never claimed. */
+    public synchronized long getLastDailyClaim(UUID uuid) {
+        String sql = "SELECT last_claimed FROM daily_claims WHERE uuid = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("last_claimed");
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to load daily claim for " + uuid, e);
+        }
+        return 0L;
+    }
+
+    public synchronized void setLastDailyClaim(UUID uuid, long timestamp) {
+        String sql = """
+                INSERT INTO daily_claims (uuid, last_claimed) VALUES (?, ?)
+                ON CONFLICT(uuid) DO UPDATE SET last_claimed = excluded.last_claimed
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setLong(2, timestamp);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to save daily claim for " + uuid, e);
         }
     }
 }

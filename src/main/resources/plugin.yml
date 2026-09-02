@@ -1,5 +1,5 @@
 name: Casino
-version: '1.0.2'
+version: '1.1.0'
 main: net.mercdev.casino.core.CasinoPlugin
 api-version: '1.21'
 author: 1mercdev
@@ -7,8 +7,8 @@ description: Multi-game casino framework (roulette, slots, blackjack, coinflip, 
 
 commands:
   casino:
-    description: Open the casino menu / manage your chip balance
-    usage: /casino [balance|deposit <amount>|withdraw <amount>|admin]
+    description: Open the casino menu || manage your chip balance
+    usage: /casino [balance|deposit <amount>|withdraw <amount>|daily|admin]
 
 permissions:
   casino.use:

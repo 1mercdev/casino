@@ -46,6 +46,12 @@ games:
 database:
   file: casino.db
 
+# Minimum and maximum daily reward, as well as its cooldown in hours
+daily-reward:
+  min: 2
+  max: 5
+  cooldown-hours: 24
+
 # Shop config: 
 # id: identifier inside the plugin (ex. water_bucket)
 # material: ACTUAL minecraft item, all caps: (WATER_BUCKET)
