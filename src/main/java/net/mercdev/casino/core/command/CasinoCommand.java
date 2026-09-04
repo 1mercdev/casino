@@ -3,6 +3,7 @@ package net.mercdev.casino.core.command;
 import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.gui.CasinoMenuHolder;
 import net.mercdev.casino.core.util.SecureRng;
+import net.mercdev.casino.core.gui.GameFx;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -112,6 +113,7 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
         plugin.getAuditLogger().logTransaction(player.getUniqueId(), "daily", amount);
 
         player.sendMessage("§aDaily reward claimed: §f+" + amount + " chips!");
+        GameFx.win(player);
     }
 
     private int parseAmount(String[] args, Player player) {
@@ -137,6 +139,11 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                                                   @NotNull String alias, String[] args) {
         if (args.length == 1) {
             return List.of("balance", "deposit", "withdraw", "daily", "admin");
+        }
+        if (args.length == 2) {
+            switch (args[0].toLowerCase()) {
+                case "admin" : return List.of("bankroll");
+            }
         }
         return List.of();
     }
