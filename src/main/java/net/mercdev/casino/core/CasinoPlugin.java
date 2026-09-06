@@ -107,6 +107,9 @@ public class CasinoPlugin extends JavaPlugin {
         if (auditLogger != null) {
             auditLogger.close();
         }
+
+        if (getConfig().getConfigurationSection("bounty-hunt").getBoolean("enabled"))
+            bountyHunt.disable();
     }
 
     /** Opens a game for a player, enforcing one active session at a time. */

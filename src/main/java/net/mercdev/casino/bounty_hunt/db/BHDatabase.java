@@ -3,7 +3,6 @@ package net.mercdev.casino.bounty_hunt.db;
 import net.mercdev.casino.bounty_hunt.types.Bounty;
 import net.mercdev.casino.bounty_hunt.types.BountyStatus;
 import net.mercdev.casino.core.CasinoPlugin;
-import net.mercdev.casino.core.audit.AuditLogger;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -15,19 +14,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class BHDatabase {
-    private final AuditLogger auditLogger;
+
     private final CasinoPlugin plugin;
     private Connection connection;
 
-    public BHDatabase(AuditLogger auditLogger, CasinoPlugin plugin){
-        this.auditLogger = auditLogger;
+    public BHDatabase(CasinoPlugin plugin){
         this.plugin = plugin;
-        this.connection = this.auditLogger.getNewConnection();
+        this.connection = plugin.getAuditLogger().getNewConnection();
     }
 
     public synchronized void init(){
         if (connection == null) {
-            plugin.getLogger().log(Level.SEVERE, "Connection was not initlialized properly. BountyHunt is not going to start.");
+            plugin.getLogger().log(Level.SEVERE, "Database connection was not initlialized properly. BountyHunt is not going to start.");
             return;
         }
         try (Statement st = connection.createStatement()) {
@@ -62,6 +60,16 @@ public class BHDatabase {
         }
     }
 
+    public synchronized void close() {
+        try {
+            if (connection != null && !connection.isClosed()){
+                connection.close();
+            }
+        } catch (SQLException e){
+            plugin.getLogger().log(Level.WARNING, "Failed to shutdown BountyHunt database normally.", e);
+        }
+    }
+
     private Bounty toBounty(ResultSet rs) throws SQLException {
     return new Bounty(
         rs.getLong("id"),
@@ -74,21 +82,25 @@ public class BHDatabase {
     );
 }
 
-    public synchronized long createBounty(UUID ownerUuid, UUID targetUuid, int reward){
-        String sql = "INSERT INTO bounties (owner_uuid, target_uuid, reward, status, created_at) VALUES (?, ?, ?, 'ACTIVE', ?)";
+    public synchronized Bounty createBounty(UUID ownerUuid, UUID targetUuid, int reward){
+        long now = System.currentTimeMillis();
+        long expiry = now + plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("bounty-duration-hours", 10) * 60L * 60L * 1000L;
+        String sql = "INSERT INTO bounties (owner_uuid, target_uuid, reward, status, created_at, expires_at) VALUES (?, ?, ?, 'ACTIVE', ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, ownerUuid.toString());
             ps.setString(2, targetUuid.toString());
             ps.setInt(3, reward);
+            ps.setLong(4, now);
+            ps.setLong(5, expiry);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getLong("id");
+                    return new Bounty(rs.getLong("id"), targetUuid, targetUuid, reward, BountyStatus.ACTIVE, now, expiry);
                 }
             }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Failed to create bounty for " + ownerUuid, e);
         }
-        return 0L;
+        return null;
     }
 
     public synchronized void logReroll(UUID uuid){
@@ -100,6 +112,21 @@ public class BHDatabase {
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Could not log bounty reroll for player: " + uuid, e);
         }
+    }
+
+    /* WILL return 0L even if an error occurs, so caution must be made. */
+    public synchronized long getLastRerollTime(UUID uuid) {
+        String sql = "SELECT rolled_at FROM bounty_rerolls WHERE uuid = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return rs.getLong("rolled_at");
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.WARNING, "Could not query latest bounty rerolls for player:" + uuid, e);
+        }
+        return 0L;
     }
     
     /* Won't do anything if bounty isn't marked as ACTIVE */
@@ -114,7 +141,7 @@ public class BHDatabase {
         }
     }
 
-    public synchronized Optional<Bounty> findActive(UUID uuid) throws SQLException {
+    public synchronized Optional<Bounty> findActive(UUID uuid) {
         String sql = """
             SELECT id, owner_uuid, target_uuid, reward,
                 status, created_at, expires_at
@@ -134,8 +161,8 @@ public class BHDatabase {
                 return Optional.of(toBounty(rs));
             }
         } catch (SQLException e ) {
-            plugin.getLogger().log(Level.WARNING, "Could not execute query for user " + uuid + "'s bounties.", e);
-            throw e;
+            plugin.getLogger().log(Level.WARNING, "db: Could not execute query for user " + uuid + "'s bounties.", e);
         }
+        return null;
     }
 }
