@@ -1,6 +1,9 @@
 # Item to use as currency: must be a minecraft item, ALL CAPS.
 currency-item: ECHO_SHARD
 
+bounty-hunt:
+  enabled: true
+
 # min cooldown for each bet. applies to all games.
 bet-cooldown-ms: 750
 
