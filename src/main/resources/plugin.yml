@@ -1,5 +1,5 @@
 name: Casino
-version: '1.1.0'
+version: '1.2.0'
 main: net.mercdev.casino.core.CasinoPlugin
 api-version: '1.21'
 author: 1mercdev
