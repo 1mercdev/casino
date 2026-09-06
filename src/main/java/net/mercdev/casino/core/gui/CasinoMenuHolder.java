@@ -26,6 +26,7 @@ public class CasinoMenuHolder implements InventoryHolder {
     private static final int FIRST_GAME_SLOT = 10;
     private static final int LAST_GAME_SLOT = 16;
     private static final int BALANCE_SLOT = 22;
+    private static final int LEADERBOARD_SLOT = 24;
 
     private final Inventory inventory;
     private final Map<Integer, String> slotToGameId = new LinkedHashMap<>();
@@ -52,11 +53,18 @@ public class CasinoMenuHolder implements InventoryHolder {
 
         inventory.setItem(BALANCE_SLOT, GuiItems.named(Material.GOLD_INGOT, "§6Balance & Deposit/Withdraw",
                 "§7Use /casino balance", "§7/casino deposit <amount>", "§7/casino withdraw <amount>"));
+        inventory.setItem(LEADERBOARD_SLOT, GuiItems.named(Material.GOLD_BLOCK, "§6Leaderboard",
+                "§7See the richest players on the server"));
+
     }
 
     /** Which game a hub slot maps to, or null if that slot isn't a game icon. */
     public String gameIdForSlot(int slot) {
         return slotToGameId.get(slot);
+    }
+
+    public boolean isLeaderboardSlot(int slot) {
+        return slot == LEADERBOARD_SLOT;
     }
 
     @Override

@@ -1,15 +1,15 @@
 package net.mercdev.casino.core.listener;
 
+import net.mercdev.casino.core.CasinoPlugin;
+import net.mercdev.casino.core.game.GameSession;
+import net.mercdev.casino.core.gui.CasinoMenuHolder;
+import net.mercdev.casino.core.gui.LeaderboardHolder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryHolder;
-
-import net.mercdev.casino.core.CasinoPlugin;
-import net.mercdev.casino.core.game.GameSession;
-import net.mercdev.casino.core.gui.CasinoMenuHolder;
 
 /**
  * Single global listener that routes every casino-related inventory event to the right
@@ -39,10 +39,22 @@ public class CasinoGuiListener implements Listener {
             event.setCancelled(true);
             if (!(event.getWhoClicked() instanceof Player player)) return;
 
-            String gameId = hub.gameIdForSlot(event.getRawSlot());
+            int slot = event.getRawSlot();
+            if (hub.isLeaderboardSlot(slot)) {
+                int size = plugin.getConfig().getInt("leaderboard.size", 10);
+                player.openInventory(new LeaderboardHolder(plugin, player, size).getInventory());
+                return;
+            }
+
+            String gameId = hub.gameIdForSlot(slot);
             if (gameId == null) return;
 
             plugin.getGameRegistry().get(gameId).ifPresent(game -> plugin.openGame(player, game));
+            return;
+        }
+
+        if (holder instanceof LeaderboardHolder) {
+            event.setCancelled(true);
         }
     }
 

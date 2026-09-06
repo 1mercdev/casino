@@ -9,6 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -127,6 +130,25 @@ public class AuditLogger {
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Failed to save balance for " + uuid, e);
         }
+    }
+
+    /** Every player who has ever had a balance row, sorted richest first. Used for the
+     *  leaderboard's top N and to work out an individual player's rank when they're not
+     *  in it — deliberately not filtered to online players, since EconomyManager's cache
+     *  only holds those and a leaderboard limited to "whoever's online right now" isn't
+     *  a real leaderboard. */
+    public synchronized List<Map.Entry<UUID, Long>> getAllBalancesDescending() {
+        List<Map.Entry<UUID, Long>> results = new ArrayList<>();
+        String sql = "SELECT uuid, chip_balance FROM players ORDER BY chip_balance DESC";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                results.add(Map.entry(UUID.fromString(rs.getString("uuid")), rs.getLong("chip_balance")));
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to load leaderboard balances", e);
+        }
+        return results;
     }
 
     /** Returns the persisted bankroll, or -1 if no row exists yet (first-ever run). */

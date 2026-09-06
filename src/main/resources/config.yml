@@ -52,6 +52,11 @@ daily-reward:
   max: 5
   cooldown-hours: 24
 
+# Leaderboard configuration:
+# "size" means the amount of players shown in the leaderboard descending from 1st. (viewer is always included)
+leaderboard:
+  size: 30
+
 # Shop config: 
 # id: identifier inside the plugin (ex. water_bucket)
 # material: ACTUAL minecraft item, all caps: (WATER_BUCKET)
