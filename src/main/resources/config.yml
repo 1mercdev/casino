@@ -3,6 +3,10 @@ currency-item: ECHO_SHARD
 
 bounty-hunt:
   enabled: true
+  reroll-cooldown-minutes: 30 
+  bounty-duration-hours: 10
+  bounty-price-percentage: 25
+  victim-payout-percentage: 70
 
 # min cooldown for each bet. applies to all games.
 bet-cooldown-ms: 750
