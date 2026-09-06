@@ -14,6 +14,9 @@ permissions:
   casino.use:
     description: Allows playing casino games and managing your chip balance
     default: true
+  casino.others.balance:
+    description: Allows you to view other user's balance.
+    default: op
   casino.admin:
     description: Allows viewing and topping up the house bankroll
     default: op

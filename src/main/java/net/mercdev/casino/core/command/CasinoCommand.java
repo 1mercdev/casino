@@ -4,6 +4,8 @@ import net.mercdev.casino.core.CasinoPlugin;
 import net.mercdev.casino.core.gui.CasinoMenuHolder;
 import net.mercdev.casino.core.util.SecureRng;
 import net.mercdev.casino.core.gui.GameFx;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CasinoCommand implements CommandExecutor, TabCompleter {
@@ -64,9 +67,26 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
 
             case "daily" -> handleDaily(player);
 
+            case "balsee" -> handleBalsee(player, args[1]);
+
             default -> player.sendMessage("§cUsage: /casino [balance|deposit <amount>|withdraw <amount>|daily]");
         }
         return true;
+    }
+
+    private void handleBalsee(Player player, String name){
+        if (!player.hasPermission("casino.others.balance")){
+                player.sendMessage("§cYou don't have permission to do that.");
+                return;
+        }
+
+        Player user = Bukkit.getPlayerExact(name);
+        if (user != null){
+            player.sendMessage("§a" + name + "'s chip balance: §f " + plugin.getEconomyManager().getBalance(user));
+        }
+        else {
+            player.sendMessage("§cCould not match the username.§f Make sure that the user is online and that the exact username is matching");
+        }
     }
 
     private void handleAdmin(Player player, String[] args) {
@@ -137,12 +157,25 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                   @NotNull String alias, String[] args) {
+        List<String> options = new ArrayList<String>(List.of("balance", "deposit", "withdraw", "daily"));
+        
+        boolean isAdmin = sender.hasPermission("casino.admin");
+        if (isAdmin)
+            options.add("admin");
+
+        if (sender.hasPermission("casino.others.balance"))
+            options.add("balsee");
+
         if (args.length == 1) {
-            return List.of("balance", "deposit", "withdraw", "daily", "admin");
+            return options;
         }
         if (args.length == 2) {
             switch (args[0].toLowerCase()) {
-                case "admin" : return List.of("bankroll");
+                case "admin" : {
+                    if (!isAdmin)
+                        return List.of();
+                    return List.of("bankroll");
+                }
             }
         }
         return List.of();
