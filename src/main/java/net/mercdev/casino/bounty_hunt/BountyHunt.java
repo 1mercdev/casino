@@ -1,5 +1,7 @@
 package net.mercdev.casino.bounty_hunt;
 
+import java.util.logging.Level;
+
 import net.mercdev.casino.bounty_hunt.command.BHCommand;
 import net.mercdev.casino.bounty_hunt.db.BHDatabase;
 import net.mercdev.casino.bounty_hunt.listener.BHGuiListener;
@@ -31,9 +33,15 @@ public class BountyHunt {
         command = new BHCommand(this);
         plugin.getCommand("bhunt").setExecutor(command);
         plugin.getCommand("bhunt").setTabCompleter(command);
+
+        plugin.getLogger().log(Level.INFO, "Initialized Bounty-Hunt module.");
     }
 
-    public void disable() {}
+    public void disable() {
+        plugin.getLogger().log(Level.INFO, "Disabling Bounty-hunt module.");
+        if (database != null)
+            database.close();
+    }
 
     public CasinoPlugin getCasinoPlugin(){
         return plugin;

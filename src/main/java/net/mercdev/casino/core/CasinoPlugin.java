@@ -93,7 +93,7 @@ public class CasinoPlugin extends JavaPlugin {
         getLogger().info("Casino framework enabled. " + gameRegistry.all().size() + " game(s) registered.");
 
         /* BountyHunt module */
-        if (getConfig().getConfigurationSection("bounty-hunt").getBoolean("enabled")){
+        if (getConfig().getConfigurationSection("bounty-hunt").getBoolean("enabled", true)){
             bountyHunt = new BountyHunt(this);
             bountyHunt.init();
         }
@@ -108,7 +108,7 @@ public class CasinoPlugin extends JavaPlugin {
             auditLogger.close();
         }
 
-        if (getConfig().getConfigurationSection("bounty-hunt").getBoolean("enabled"))
+        if (bountyHunt != null) 
             bountyHunt.disable();
     }
 

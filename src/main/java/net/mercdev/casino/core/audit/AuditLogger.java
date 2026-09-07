@@ -229,9 +229,11 @@ public class AuditLogger {
     }
 
     public Connection getNewConnection(){
-        try (Connection connection = DriverManager.getConnection(jdbcUrl)){
+        try {
+            Class.forName("org.sqlite.JDBC");
+            Connection connection = DriverManager.getConnection(jdbcUrl);
             return connection;
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             plugin.getLogger().log(Level.SEVERE, "could not initialize connection to database", e);
             return null;
         }

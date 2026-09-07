@@ -30,7 +30,7 @@ public class BHDatabase {
         }
         try (Statement st = connection.createStatement()) {
             st.executeUpdate("""
-                CREATE IF NOT EXISTS bounties (
+                CREATE TABLE IF NOT EXISTS bounties (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     owner_uuid TEXT NOT NULL,
                     target_uuid TEXT NOT NULL,
@@ -41,7 +41,7 @@ public class BHDatabase {
                 )
             """);
             st.executeUpdate("""
-                CREATE IF NOT EXISTS bounty_rerolls (
+                CREATE TABLE IF NOT EXISTS bounty_rerolls (
                     uuid TEXT PRIMARY KEY,
                     rolled_at INTEGER NOT NULL
                 )
