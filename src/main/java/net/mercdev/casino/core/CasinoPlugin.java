@@ -5,6 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import net.mercdev.casino.bounty_hunt.BountyHunt;
 import net.mercdev.casino.core.audit.AuditLogger;
 import net.mercdev.casino.core.betting.BetLimitManager;
 import net.mercdev.casino.core.command.CasinoCommand;
@@ -34,6 +35,8 @@ public class CasinoPlugin extends JavaPlugin {
     private SessionManager sessionManager;
     private Material currencyItem;
     private double houseEdge;
+
+    private BountyHunt bountyHunt;
 
     private boolean isPluginEnabled(String id, ConfigurationSection gameSection){
         return gameSection.getConfigurationSection(id).getBoolean("enabled", true);
@@ -88,6 +91,12 @@ public class CasinoPlugin extends JavaPlugin {
         }
 
         getLogger().info("Casino framework enabled. " + gameRegistry.all().size() + " game(s) registered.");
+
+        /* BountyHunt module */
+        if (getConfig().getConfigurationSection("bounty-hunt").getBoolean("enabled", true)){
+            bountyHunt = new BountyHunt(this);
+            bountyHunt.init();
+        }
     }
 
     @Override
@@ -98,6 +107,9 @@ public class CasinoPlugin extends JavaPlugin {
         if (auditLogger != null) {
             auditLogger.close();
         }
+
+        if (bountyHunt != null) 
+            bountyHunt.disable();
     }
 
     /** Opens a game for a player, enforcing one active session at a time. */

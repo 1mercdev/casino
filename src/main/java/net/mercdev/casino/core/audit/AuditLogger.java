@@ -249,4 +249,15 @@ public class AuditLogger {
             plugin.getLogger().log(Level.WARNING, "Failed to save daily claim for " + uuid, e);
         }
     }
+
+    public Connection getNewConnection(){
+        try {
+            Class.forName("org.sqlite.JDBC");
+            Connection connection = DriverManager.getConnection(jdbcUrl);
+            return connection;
+        } catch (SQLException | ClassNotFoundException e) {
+            plugin.getLogger().log(Level.SEVERE, "could not initialize connection to database", e);
+            return null;
+        }
+    }
 }
