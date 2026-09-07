@@ -1,11 +1,14 @@
 # Item to use as currency: must be a minecraft item, ALL CAPS.
 currency-item: ECHO_SHARD
 
+# configuration for the bounty-hunt module
 bounty-hunt:
   enabled: true
   reroll-cooldown-minutes: 30 
   bounty-duration-hours: 10
+  # for bounty-price-percentage, minimum is always 5%
   bounty-price-percentage: 25
+  bounty-minimum-reward: 10
   victim-payout-percentage: 70
 
 # min cooldown for each bet. applies to all games.

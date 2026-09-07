@@ -26,7 +26,7 @@ public class BountyManager {
     private final EconomyManager manager;
     private final AuditLogger auditLogger;
 
-    private boolean skipRegenCheck = false;
+    private boolean preventRegenRecursion = false;
 
     private final Map<UUID,Bounty> bounties = new ConcurrentHashMap<>();
 
@@ -82,13 +82,13 @@ public class BountyManager {
         else
             bounty = bounties.get(player.getUniqueId());
 
-        if (!checkBountyExpiry(bounty))
+        if (checkBountyExpiry(bounty))
             return;
 
         manager.addChips(player, bounty.getReward());
         auditLogger.logTransaction(player.getUniqueId(), "bounty-claim", bounty.getReward());
 
-        manager.removeChips(Bukkit.getPlayer(bounty.getVictimUuid()), (bounty.getReward() / 100) * plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("victim-payout-percentage", 70));
+        manager.removeChips(Bukkit.getPlayer(bounty.getVictimUuid()), (bounty.getReward() * plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("victim-payout-percentage", 70)) / 100);
         auditLogger.logTransaction(bounty.getVictimUuid(), "bounty-payout", bounty.getReward());
 
         database.updateStatus(bounty.getId(), BountyStatus.CLAIMED);
@@ -99,16 +99,19 @@ public class BountyManager {
         List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
         players.remove(player);
 
-        if (players.size() == 1 && !skipRegenCheck){
-            skipRegenCheck = true;
+        if (players.size() == 1 && !preventRegenRecursion){
+            preventRegenRecursion = true;
             loadPlayer(players.getFirst());
         }
-        skipRegenCheck = false;
+        preventRegenRecursion = false;
 
         if (players.size() >= 1) {
             Player randomPlayer = players.get(ThreadLocalRandom.current().nextInt(players.size()));
             
-            int reward = (((int)manager.getBalance(randomPlayer)) / 100) * (ThreadLocalRandom.current().nextInt(plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("bounty-price-percentage", 25))) + 1;
+            // reward = victim's balance * random percentage(from 5 to config value) / 100
+            int reward = (((int)manager.getBalance(randomPlayer)) * (ThreadLocalRandom.current().nextInt(4, plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("bounty-price-percentage", 25 + 1))) / 100);
+            // get the maximum between the minimum amount and the current reward
+            reward = Math.max(reward, plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("bounty-minimum-reward", 10));
             Bounty bounty = database.createBounty(player.getUniqueId(), randomPlayer.getUniqueId(), reward);
 
             bounties.put(player.getUniqueId(), bounty);
@@ -120,9 +123,16 @@ public class BountyManager {
 
     public void tryBountyClaim(Player target, Player victim) {
         Bounty bounty = bounties.get(target.getUniqueId());
-        if (bounty.getTargetUuid() == target.getUniqueId() && bounty.getVictimUuid() == victim.getUniqueId() && !checkBountyExpiry(bounty)) {
-            payoutBounty(target, bounty);
-        }
+        if (bounty == null)
+            return;
+        if (!bounty.getTargetUuid().equals(target.getUniqueId()))
+            return;
+        if (!bounty.getVictimUuid().equals(victim.getUniqueId()))
+            return;
+        if (checkBountyExpiry(bounty))
+            return;
+
+        payoutBounty(target, bounty);
     }
 
     public void loadPlayer(Player player) {
@@ -131,11 +141,15 @@ public class BountyManager {
             plugin.getLogger().warning("Database error while querying active bounty for user " + player.name());
             return;
         }
-        if (bounty.isEmpty())
+        if (bounty.isEmpty()){
             regen(player);
+            return;
+        }
 
-        if (checkBountyExpiry(bounty.get()))
+        if (checkBountyExpiry(bounty.get())){
             regen(player);
+            return;
+        }
 
         bounties.put(player.getUniqueId(), bounty.get());
     }
