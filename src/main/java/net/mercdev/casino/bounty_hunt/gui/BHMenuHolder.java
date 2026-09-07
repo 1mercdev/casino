@@ -16,31 +16,34 @@ import net.mercdev.casino.core.gui.GuiItems;
 
 public class BHMenuHolder implements InventoryHolder{
     
-    private static final int VICTIM_SLOT = 11;
-    private static final int STATUS_SLOT = 12;
-    private static final int INFO_SLOT = 14;
-    private static final int BOUNTY_TIMER_SLOT = 16;
-    private static final int REROLL_SLOT = 17;
-    private static final int REROLL_TIMER_SLOT = 18;
+    private static final int VICTIM_SLOT = 10;
+    private static final int STATUS_SLOT = 11;
+    private static final int INFO_SLOT = 13;
+    private static final int BOUNTY_TIMER_SLOT = 9;
+    private static final int REROLL_SLOT = 16;
+    private static final int REROLL_TIMER_SLOT = 15;
 
     private BountyHunt bountyHunt;
     private Inventory inventory;
 
-    public BHMenuHolder(BountyHunt bHunt) {
+    public BHMenuHolder(BountyHunt bHunt, Player player) {
         this.inventory = Bukkit.createInventory(this, 27, "Bounty Hunt");
         this.bountyHunt = bHunt;
-        build(bountyHunt);
+        build(bountyHunt, player);
     }
 
-    private void build(BountyHunt bHunt) {
+    private void build(BountyHunt bHunt, Player player) {
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, GuiItems.filler(Material.GRAY_STAINED_GLASS_PANE));
         }
 
         inventory.setItem(INFO_SLOT, GuiItems.glow(GuiItems.named(Material.MAP, "§bBounty Hunt", "§7Kill your objective for rewards.")));
 
-        Player player = (Player) inventory.getHolder();
         Bounty bounty = bHunt.getBountyManager().getBounty(player.getUniqueId());
+        if (bounty == null) {
+            inventory.setItem(BOUNTY_TIMER_SLOT, GuiItems.named(Material.BARRIER, "No bounty found...", "This is an error.", "If this happens to you, either rejoin, or wait and try again.", "If the issue persists, contact a developer and report the issue."));
+            return;
+        }
         OfflinePlayer victim = Bukkit.getOfflinePlayer(bounty.getVictimUuid());
 
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
@@ -59,18 +62,23 @@ public class BHMenuHolder implements InventoryHolder{
             case CLAIMED:
                 statusMaterial = Material.YELLOW_TERRACOTTA;
                 statusName = "§eClaimed";
+                break;
             case EXPIRED:
                 statusMaterial = Material.RED_TERRACOTTA;
                 statusName = "§cExpired";
+                break;
             case ACTIVE:
                 statusMaterial = Material.LIME_TERRACOTTA;
                 statusName = "§aActive";
+                break;
             case REROLLED:
                 statusMaterial = Material.LIGHT_BLUE_TERRACOTTA;
                 statusName = "§1Rerolled";
+                break;
             default:
                 statusMaterial = Material.BARRIER;
                 statusName = "Unknown";
+                break;
         }
         inventory.setItem(STATUS_SLOT, GuiItems.named(statusMaterial, statusName, ""));
 
@@ -87,6 +95,8 @@ public class BHMenuHolder implements InventoryHolder{
         }
 
         inventory.setItem(BOUNTY_TIMER_SLOT, GuiItems.named(Material.COMPASS, "Time left until bounty expires:", bountyTimerString));
+
+        inventory.setItem(REROLL_SLOT, GuiItems.named(Material.ARROW, "§eReroll Bounty", ""));
 
         String rerollTimerString;
         long lastRerolled = bHunt.getDatabase().getLastRerollTime(player.getUniqueId());

@@ -50,7 +50,9 @@ public class BHDatabase {
                 CREATE UNIQUE INDEX IF NOT EXISTS idx_one_active_bounty
                 ON bounties(owner_uuid)
                 WHERE status = 'ACTIVE';
-
+            """);
+                    
+            st.executeUpdate("""
                 CREATE INDEX IF NOT EXISTS idx_bounty_target
                 ON bounties(target_uuid);
             """);
@@ -85,7 +87,7 @@ public class BHDatabase {
     public synchronized Bounty createBounty(UUID ownerUuid, UUID targetUuid, int reward){
         long now = System.currentTimeMillis();
         long expiry = now + plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("bounty-duration-hours", 10) * 60L * 60L * 1000L;
-        String sql = "INSERT INTO bounties (owner_uuid, target_uuid, reward, status, created_at, expires_at) VALUES (?, ?, ?, 'ACTIVE', ?, ?)";
+        String sql = "INSERT INTO bounties (owner_uuid, target_uuid, reward, status, created_at, expires_at) VALUES (?, ?, ?, 'ACTIVE', ?, ?) RETURNING id";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, ownerUuid.toString());
             ps.setString(2, targetUuid.toString());
@@ -131,7 +133,7 @@ public class BHDatabase {
     
     /* Won't do anything if bounty isn't marked as ACTIVE */
     public synchronized void updateStatus(long id, BountyStatus status){
-        String sql = "UPDATE bounties SET status = ? WHERE id = ? AND status = ACTIVE";
+        String sql = "UPDATE bounties SET status = ? WHERE id = ? AND status = 'ACTIVE'";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status.name());
             ps.setLong(2, id);

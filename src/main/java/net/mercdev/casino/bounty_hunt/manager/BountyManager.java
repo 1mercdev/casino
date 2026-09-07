@@ -115,8 +115,10 @@ public class BountyManager {
             Bounty bounty = database.createBounty(player.getUniqueId(), randomPlayer.getUniqueId(), reward);
 
             bounties.put(player.getUniqueId(), bounty);
+            player.sendMessage("§fBHunt: §dYou have been assigned a new bounty to hunt!§f use §6/bhunt§f to check it.");
             return;
         }
+        player.sendMessage("§fBHunt: §bSince it's just you in the server, you can't have a bounty assigned to you.");
         // if the server is empty, make sure a regen clears the cache.
         bounties.remove(player.getUniqueId());
     }

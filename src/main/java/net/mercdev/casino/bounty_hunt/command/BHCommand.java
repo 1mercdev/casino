@@ -2,6 +2,7 @@ package net.mercdev.casino.bounty_hunt.command;
 
 import net.mercdev.casino.bounty_hunt.BountyHunt;
 import net.mercdev.casino.bounty_hunt.gui.BHMenuHolder;
+import net.mercdev.casino.bounty_hunt.types.Bounty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +28,11 @@ public class BHCommand implements CommandExecutor, TabCompleter {
    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String args[]){
         if (!(sender instanceof Player player)) {
             sender.sendMessage("This command can only be used in-game.");
-            return false;
+            return true;
         }
         if (!sender.hasPermission("casino.use")) {
             sender.sendMessage("§cYou do not have permission to use this command.");
-            return false;
+            return true;
         }
 
         List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
@@ -40,8 +41,11 @@ public class BHCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        bHunt.getBountyManager().checkBountyExpiry(bHunt.getBountyManager().getBounty(player.getUniqueId()));
-        player.openInventory(new BHMenuHolder(bHunt).getInventory());
+        Bounty bounty = bHunt.getBountyManager().getBounty(player.getUniqueId());
+        if (bounty != null) {
+                bHunt.getBountyManager().checkBountyExpiry(bounty);
+        }
+        player.openInventory(new BHMenuHolder(bHunt, player).getInventory());
         return true;
    }
 
