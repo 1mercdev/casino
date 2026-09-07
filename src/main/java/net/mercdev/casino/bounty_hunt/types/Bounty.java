@@ -8,7 +8,7 @@ public class Bounty {
     private final UUID targetUuid;
     private final UUID victimUuid;
     private final long reward;
-    private final BountyStatus status;
+    private BountyStatus status;
     private final long createdAt;
     private final Long expiresAt;
 
@@ -44,6 +44,10 @@ public class Bounty {
 
     public long getReward(){
         return reward;
+    }
+
+    public void setBountyStatus(BountyStatus status){
+        this.status = status;
     }
 
     public BountyStatus getBountyStatus(){

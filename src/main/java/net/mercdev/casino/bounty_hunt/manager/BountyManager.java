@@ -26,6 +26,8 @@ public class BountyManager {
     private final EconomyManager manager;
     private final AuditLogger auditLogger;
 
+    private boolean skipRegenCheck = false;
+
     private final Map<UUID,Bounty> bounties = new ConcurrentHashMap<>();
 
     public BountyManager(JavaPlugin plugin, BHDatabase database, EconomyManager manager, AuditLogger audit) {
@@ -36,15 +38,16 @@ public class BountyManager {
     }
     
     /* returns true if expired */
-    private boolean checkBountyExpiry(Bounty bounty) {
+    public boolean checkBountyExpiry(Bounty bounty) {
         if (System.currentTimeMillis() > bounty.getExpiryTimeMillis()){
+            bounty.setBountyStatus(BountyStatus.EXPIRED);
             database.updateStatus(bounty.getId(), BountyStatus.EXPIRED);
             return true;
         }
         return false;
     }
 
-    public Bounty getBounty(UUID uuid) {
+    public @Nullable Bounty getBounty(UUID uuid) {
         return bounties.get(uuid);
     }
 
@@ -72,7 +75,7 @@ public class BountyManager {
     }
 
     /* Provide the bounty or null it */
-    public void payoutBounty(Player player, @Nullable Bounty _bounty) {
+    private void payoutBounty(Player player, @Nullable Bounty _bounty) {
         Bounty bounty;
         if (_bounty != null)
             bounty = _bounty;
@@ -91,17 +94,28 @@ public class BountyManager {
         database.updateStatus(bounty.getId(), BountyStatus.CLAIMED);
     }
 
+    /* Utilizes the private skipRegenCheck to break a loop upon player 2 join. */
     private void regen(Player player){
         List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+        players.remove(player);
 
-        if (!players.isEmpty()) {
+        if (players.size() == 1 && !skipRegenCheck){
+            skipRegenCheck = true;
+            loadPlayer(players.getFirst());
+        }
+        skipRegenCheck = false;
+
+        if (players.size() >= 1) {
             Player randomPlayer = players.get(ThreadLocalRandom.current().nextInt(players.size()));
             
             int reward = (((int)manager.getBalance(randomPlayer)) / 100) * (ThreadLocalRandom.current().nextInt(plugin.getConfig().getConfigurationSection("bounty-hunt").getInt("bounty-price-percentage", 25))) + 1;
             Bounty bounty = database.createBounty(player.getUniqueId(), randomPlayer.getUniqueId(), reward);
 
             bounties.put(player.getUniqueId(), bounty);
+            return;
         }
+        // if the server is empty, make sure a regen clears the cache.
+        bounties.remove(player.getUniqueId());
     }
 
     public void tryBountyClaim(Player target, Player victim) {
