@@ -2,6 +2,7 @@ package net.mercdev.casino.bounty_hunt;
 
 import net.mercdev.casino.bounty_hunt.command.BHCommand;
 import net.mercdev.casino.bounty_hunt.db.BHDatabase;
+import net.mercdev.casino.bounty_hunt.listener.BHGuiListener;
 import net.mercdev.casino.bounty_hunt.listener.BHListener;
 import net.mercdev.casino.bounty_hunt.manager.BountyManager;
 import net.mercdev.casino.core.CasinoPlugin;
@@ -25,8 +26,9 @@ public class BountyHunt {
         manager = new BountyManager(plugin, database, plugin.getEconomyManager(), plugin.getAuditLogger());
 
         plugin.getServer().getPluginManager().registerEvents(new BHListener(this), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new BHGuiListener(this), plugin);
 
-        command = new BHCommand(this, plugin);
+        command = new BHCommand(this);
         plugin.getCommand("bhunt").setExecutor(command);
         plugin.getCommand("bhunt").setTabCompleter(command);
     }
@@ -39,5 +41,9 @@ public class BountyHunt {
 
     public BountyManager getBountyManager(){
         return manager;
+    }
+
+    public BHDatabase getDatabase(){
+        return database;
     }
 }

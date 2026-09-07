@@ -29,6 +29,11 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("This command can only be used in-game.");
             return true;
         }
+        
+        if (!sender.hasPermission("casino.use")) {
+            sender.sendMessage("§cYou do not have permissions to use this command");
+            return true;
+        }
 
         if (args.length == 0) {
             player.openInventory(new CasinoMenuHolder(plugin.getGameRegistry()).getInventory());
